@@ -1,0 +1,53 @@
+
+services:
+  db:
+    image: postgres:15
+    container_name: imdb_db
+    environment:
+      POSTGRES_DB: imdb_clone
+      POSTGRES_USER: imdb_user
+      POSTGRES_PASSWORD: imdb_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - imdb_network
+
+  backend:
+    build: ./backend
+    container_name: imdb_backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://imdb_user:imdb_password@db:5432/imdb_clone
+      SECRET_KEY: your-secret-key-here
+      GOOGLE_CLIENT_ID: your-google-client-id
+      GOOGLE_CLIENT_SECRET: your-google-client-secret
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - /app/__pycache__
+    networks:
+      - imdb_network
+
+  frontend:
+    build: ./frontend
+    container_name: imdb_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      VUE_APP_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - imdb_network
+
+volumes:
+  postgres_data:
+
+networks:
+  imdb_network:
+    driver: bridge

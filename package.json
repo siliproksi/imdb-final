@@ -1,0 +1,11 @@
+{
+  "name": "imdb-clone",
+  "version": "1.0.0",
+  "description": "A slimmed-down IMDB web application with Vue frontend, FastAPI backend, and PostgreSQL database",
+  "scripts": {
+    "dev": "docker compose up --build",
+    "stop": "docker compose down",
+    "install-frontend": "cd frontend && npm install",
+    "install-backend": "cd backend && pip install -r requirements.txt"
+  }
+}
