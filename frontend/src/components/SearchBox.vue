@@ -27,7 +27,7 @@
         @click="selectResult(result)"
         class="search-result-item"
       >
-        <img v-if="result.image_url" :src="result.image_url" alt="" class="result-image" />
+        <img :src="result.image_url || result.photo_url || (result.title ? '/placeholder-movie.jpg' : '/placeholder-actor.jpg')" :alt="result.title || result.name" class="result-image" />
         <div class="result-info">
           <div class="result-title">{{ result.title || result.name }}</div>
           <div class="result-subtitle">{{ result.release_year || 'Actor' }}</div>
@@ -172,8 +172,8 @@ export default {
   }
   
   .search-btn {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.5rem 0.35rem;
+    font-size: 0.8rem;
   }
 }
 

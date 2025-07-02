@@ -59,6 +59,10 @@
               accept="image/*"
               class="form-input file-input"
             />
+            <div v-if="photoPreview" class="photo-preview">
+              <img :src="photoPreview" alt="Photo preview" class="preview-image" />
+              <button type="button" @click="removePhoto" class="remove-photo-btn">×</button>
+            </div>
           </div>
           
           <button type="submit" :disabled="loading" class="submit-btn">
@@ -72,6 +76,8 @@
           
           <div v-if="success" class="success-message">
             {{ $t('register.successMessage') }}
+            <br><br>
+            <span class="redirect-message">Redirecting to login in {{ countdown }}...</span>
           </div>
         </form>
         
@@ -96,11 +102,15 @@ export default {
         email: '',
         password: '',
         country: '',
-        city: ''
+        city: '',
+        photo: null
       },
       photoFile: null,
+      photoPreview: null,
       error: '',
-      success: false
+      success: false,
+      countdown: 3,
+      countdownInterval: null
     }
   },
   
@@ -112,7 +122,32 @@ export default {
     ...mapActions(['register']),
     
     handlePhotoChange(event) {
-      this.photoFile = event.target.files[0]
+      const file = event.target.files[0]
+      if (file) {
+        this.photoFile = file
+        
+        // Create FileReader to convert to base64 and show preview
+        const reader = new FileReader()
+        
+        reader.onload = (e) => {
+          const base64 = e.target.result
+          this.photoPreview = base64
+          this.form.photo = base64
+        }
+        
+        reader.readAsDataURL(file)
+      }
+    },
+    
+    removePhoto() {
+      this.photoFile = null
+      this.photoPreview = null
+      this.form.photo = null
+      // Clear the file input
+      const fileInput = document.getElementById('photo')
+      if (fileInput) {
+        fileInput.value = ''
+      }
     },
     
     async handleRegister() {
@@ -121,9 +156,7 @@ export default {
       if (result.success) {
         this.error = '' // Only clear on success
         this.success = true
-        setTimeout(() => {
-          this.$router.push('/login')
-        }, 2000)
+        this.startCountdown()
       } else {
         this.error = result.message
         this.success = false
@@ -133,6 +166,24 @@ export default {
     
     clearError() {
       this.error = ''
+    },
+    
+    startCountdown() {
+      this.countdown = 3
+      this.countdownInterval = setInterval(() => {
+        this.countdown--
+        if (this.countdown <= 0) {
+          clearInterval(this.countdownInterval)
+          this.$router.push('/login')
+        }
+      }, 1000)
+    }
+  },
+  
+  beforeUnmount() {
+    // Clean up interval if component is destroyed
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval)
     }
   }
 }
@@ -305,6 +356,12 @@ h2 {
   text-align: center;
 }
 
+.redirect-message {
+  font-weight: normal;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
 .login-link {
   text-align: center;
   margin-top: 2rem;
@@ -321,5 +378,58 @@ h2 {
 
 .login-link a:hover {
   text-decoration: underline;
+}
+
+.photo-preview {
+  position: relative;
+  margin-top: 1rem;
+  display: inline-block;
+}
+
+.preview-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #f5c518;
+}
+
+.remove-photo-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.remove-photo-btn:hover {
+  background-color: #c82333;
+}
+
+/* Mobile responsive for photo preview */
+@media (max-width: 480px) {
+  .preview-image {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .remove-photo-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    top: -6px;
+    right: -6px;
+  }
 }
 </style>

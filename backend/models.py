@@ -13,7 +13,7 @@ class User(Base):
     hashed_password = Column(String, nullable=True)  # Nullable for Google OAuth users
     country = Column(String)
     city = Column(String)
-    photo_url = Column(String)
+    photo_url = Column(Text)  # Changed to Text to store base64 data
     google_id = Column(String, unique=True, index=True, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

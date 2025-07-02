@@ -10,6 +10,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    photo: Optional[str] = None  # Base64 encoded photo data
     
     @validator('password')
     def validate_password(cls, v):

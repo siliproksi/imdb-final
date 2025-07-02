@@ -17,7 +17,8 @@ def create_user(db: Session, user: schemas.UserCreate):
         email=user.email,
         hashed_password=hashed_password,
         country=user.country,
-        city=user.city
+        city=user.city,
+        photo_url=user.photo  # Store base64 photo data in photo_url field
     )
     db.add(db_user)
     db.commit()
