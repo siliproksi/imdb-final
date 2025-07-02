@@ -24,14 +24,6 @@
             >
               <div class="movie-image">
                 <img :src="movie.image_url || '/placeholder-movie.jpg'" :alt="movie.title" />
-                <div class="movie-overlay">
-                  <button v-if="!user" @click.stop="redirectToLogin" class="overlay-btn">
-                    {{ $t('home.addToWatchlist') }}
-                  </button>
-                  <button v-else @click.stop="addToWatchlist(movie.id)" class="overlay-btn">
-                    {{ $t('home.addToWatchlist') }}
-                  </button>
-                </div>
               </div>
               
               <div class="movie-info">
@@ -43,6 +35,22 @@
                   </span>
                 </div>
                 <p class="movie-summary">{{ truncateSummary(movie.summary) }}</p>
+                
+                <div class="movie-actions">
+                  <button v-if="!user" @click.stop="redirectToLogin" class="action-btn watchlist-btn">
+                    {{ $t('home.addToWatchlist') }}
+                  </button>
+                  <button v-else @click.stop="addToWatchlist(movie.id)" class="action-btn watchlist-btn">
+                    {{ $t('home.addToWatchlist') }}
+                  </button>
+                  
+                  <button v-if="!user" @click.stop="redirectToLogin" class="action-btn rate-btn">
+                    {{ $t('movie.rateMovie') }}
+                  </button>
+                  <button v-else @click.stop="goToMovie(movie.id)" class="action-btn rate-btn">
+                    {{ $t('movie.rateMovie') }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -267,6 +275,16 @@ export default {
     height: 270px;
   }
   
+  .action-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  
+  .movie-actions {
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+  
   .loading {
     padding: 1.5rem;
     font-size: 1rem;
@@ -285,37 +303,41 @@ export default {
   object-fit: cover;
 }
 
-.movie-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+.movie-actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
-.movie-card:hover .movie-overlay {
-  opacity: 1;
-}
-
-.overlay-btn {
-  background-color: #f5c518;
-  color: #000;
+.action-btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 4px;
+  font-size: 0.8rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.overlay-btn:hover {
+.watchlist-btn {
+  background-color: #f5c518;
+  color: #000;
+}
+
+.watchlist-btn:hover {
   background-color: #e6b800;
+}
+
+.rate-btn {
+  background-color: transparent;
+  color: #f5c518;
+  border: 1px solid #f5c518;
+}
+
+.rate-btn:hover {
+  background-color: #f5c518;
+  color: #000;
 }
 
 .movie-info {
