@@ -12,7 +12,8 @@ const messages = {
       login: 'Login',
       logout: 'Logout',
       register: 'Register',
-      watchlist: 'Watchlist'
+      watchlist: 'Watchlist',
+      close: 'Close'
     },
     home: {
       title: 'Popular Movies',
@@ -95,7 +96,8 @@ const messages = {
       login: 'Giriş',
       logout: 'Çıkış',
       register: 'Kayıt Ol',
-      watchlist: 'İzleme Listesi'
+      watchlist: 'İzleme Listesi',
+      close: 'Kapat'
     },
     home: {
       title: 'Popüler Filmler',

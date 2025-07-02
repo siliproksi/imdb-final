@@ -17,7 +17,7 @@
         class="search-input"
       />
       
-      <button @click="performSearch" class="search-btn">{{ $t('search.searchButton') }}</button>
+      <button @click="performSearch" class="search-btn">🔍</button>
     </div>
     
     <div v-if="showDropdown && searchResults.length > 0" class="search-dropdown">
@@ -168,6 +168,7 @@ export default {
   .search-input {
     padding: 0.6rem;
     font-size: 16px;
+    max-width: 200px;
   }
   
   .search-btn {

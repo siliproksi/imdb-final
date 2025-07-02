@@ -1,21 +1,15 @@
 <template>
-  <header class="header">
+  <!-- DESKTOP HEADER -->
+  <header class="header desktop-header">
     <div class="container">
       <div class="header-content">
-        <div class="nav-brand">
-          <router-link to="/" class="logo">IMDB Clone</router-link>
-          <button @click="toggleMobileMenu" class="mobile-menu-btn">
-            <span :class="{ active: showMobileMenu }"></span>
-            <span :class="{ active: showMobileMenu }"></span>
-            <span :class="{ active: showMobileMenu }"></span>
-          </button>
-        </div>
+        <router-link to="/" class="logo">IMDB Clone</router-link>
         
-        <div class="nav-center desktop-only">
+        <div class="search-section">
           <SearchBox />
         </div>
         
-        <div class="nav-right desktop-only">
+        <div class="nav-right">
           <div class="language-toggle">
             <select v-model="currentLanguage" @change="changeLanguage">
               <option value="en">EN</option>
@@ -35,35 +29,53 @@
           </div>
         </div>
       </div>
-      
-      <!-- Mobile Menu -->
-      <div :class="['mobile-menu', { active: showMobileMenu }]">
+    </div>
+  </header>
+
+  <!-- MOBILE HEADER -->
+  <header class="header mobile-header">
+    <div class="container">
+      <div class="mobile-header-content">
         <div class="mobile-search">
           <SearchBox />
         </div>
-        
-        <div class="mobile-nav">
-          <div class="language-toggle">
-            <select v-model="currentLanguage" @change="changeLanguage">
-              <option value="en">EN</option>
-              <option value="tr">TR</option>
-            </select>
-          </div>
-          
-          <div v-if="!user" class="mobile-auth-links">
-            <router-link to="/login" class="mobile-nav-link" @click="closeMobileMenu">{{ $t('nav.login') }}</router-link>
-            <router-link to="/register" class="mobile-nav-link" @click="closeMobileMenu">{{ $t('nav.register') }}</router-link>
-          </div>
-          
-          <div v-else class="mobile-user-menu">
-            <div class="mobile-username">{{ user.email }}</div>
-            <router-link to="/watchlist" class="mobile-nav-link" @click="closeMobileMenu">{{ $t('nav.watchlist') }}</router-link>
-            <button @click="logout" class="mobile-nav-link mobile-logout-btn">{{ $t('nav.logout') }}</button>
-          </div>
+        <div class="hamburger" @click="toggleMobileMenu">
+          <span :class="{ active: showMobileMenu }"></span>
+          <span :class="{ active: showMobileMenu }"></span>
+          <span :class="{ active: showMobileMenu }"></span>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- MOBILE MENU -->
+  <div v-if="showMobileMenu" class="mobile-overlay">
+    <div class="mobile-menu-content">
+      <!-- User email at the very top when logged in -->
+      <div v-if="user" class="mobile-user-email">{{ user.email }}</div>
+      
+      <div class="mobile-language">
+        <select v-model="currentLanguage" @change="changeLanguage">
+          <option value="en">EN</option>
+          <option value="tr">TR</option>
+        </select>
+      </div>
+      
+      <div v-if="!user" class="mobile-links">
+        <router-link to="/" @click="closeMobileMenu">{{ $t('nav.home') }}</router-link>
+        <router-link to="/login" @click="closeMobileMenu">{{ $t('nav.login') }}</router-link>
+        <router-link to="/register" @click="closeMobileMenu">{{ $t('nav.register') }}</router-link>
+        <button @click="closeMobileMenu" class="close-btn">{{ $t('nav.close') }}</button>
+      </div>
+      
+      <div v-else class="mobile-links">
+        <router-link to="/" @click="closeMobileMenu">{{ $t('nav.home') }}</router-link>
+        <router-link to="/watchlist" @click="closeMobileMenu">{{ $t('nav.watchlist') }}</router-link>
+        <button @click="logout">{{ $t('nav.logout') }}</button>
+        <button @click="closeMobileMenu" class="close-btn">{{ $t('nav.close') }}</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -84,6 +96,8 @@ export default {
   computed: {
     ...mapState(['user'])
   },
+  
+  
   methods: {
     ...mapActions(['logoutUser']),
     changeLanguage() {
@@ -108,20 +122,15 @@ export default {
 </script>
 
 <style scoped>
-.header {
+/* DESKTOP STYLES */
+.desktop-header {
   background-color: #1a1a1a;
   padding: 1rem 0;
   border-bottom: 1px solid #333;
-  position: relative;
+  display: block;
 }
 
 .header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.nav-brand {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -134,37 +143,7 @@ export default {
   text-decoration: none;
 }
 
-.mobile-menu-btn {
-  display: none;
-  flex-direction: column;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  gap: 4px;
-}
-
-.mobile-menu-btn span {
-  width: 25px;
-  height: 3px;
-  background-color: #f5c518;
-  transition: all 0.3s ease;
-  border-radius: 3px;
-}
-
-.mobile-menu-btn span.active:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
-}
-
-.mobile-menu-btn span.active:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-btn span.active:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
-}
-
-.nav-center {
+.search-section {
   flex: 1;
   max-width: 400px;
   margin: 0 2rem;
@@ -216,110 +195,165 @@ export default {
   font-weight: bold;
 }
 
-/* Mobile Menu */
-.mobile-menu {
-  display: none;
+/* MOBILE STYLES */
+.mobile-header {
   background-color: #1a1a1a;
-  border-top: 1px solid #333;
   padding: 1rem 0;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  transform: translateY(-100%);
-  opacity: 0;
-  transition: all 0.3s ease;
+  border-bottom: 1px solid #333;
+  display: none;
 }
 
-.mobile-menu.active {
-  transform: translateY(0);
-  opacity: 1;
+.mobile-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
 .mobile-search {
-  margin-bottom: 1rem;
+  flex: 1;
+  max-width: 300px;
 }
 
-.mobile-nav {
+.mobile-logo {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #f5c518;
+  text-decoration: none;
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 4px;
+  padding: 0.5rem;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: #f5c518;
+  transition: all 0.3s ease;
+  border-radius: 3px;
+}
+
+.hamburger span.active:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger span.active:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger span.active:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* MOBILE MENU OVERLAY */
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu-content {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.mobile-user-email {
+  color: #f5c518;
+  font-weight: bold;
+  text-align: center;
+  padding: 0.5rem 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.mobile-language {
+  margin-bottom: 1.5rem;
+}
+
+.mobile-language select {
+  width: 100%;
+  background-color: #333;
+  color: white;
+  border: 1px solid #555;
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+.mobile-links {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.mobile-auth-links, .mobile-user-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.mobile-nav-link {
+.mobile-links a, .mobile-links button {
   color: white;
   text-decoration: none;
-  padding: 0.75rem;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-  text-align: center;
+  padding: 1rem;
   border: 1px solid #333;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: center;
+  transition: background-color 0.3s;
 }
 
-.mobile-nav-link:hover {
+.mobile-links a:hover, .mobile-links button:hover {
   background-color: #333;
 }
 
-.mobile-logout-btn {
-  background: none;
-  border: 1px solid #333;
-  cursor: pointer;
-  font-size: inherit;
-  color: white;
-}
-
-.mobile-username {
+.mobile-user {
   color: #f5c518;
   font-weight: bold;
   text-align: center;
-  padding: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #f5c518;
+  border-radius: 4px;
 }
 
-.desktop-only {
-  display: flex;
+.close-btn {
+  background-color: #666 !important;
+  border: 1px solid #666 !important;
+  color: white !important;
 }
 
-/* Responsive Design */
+.close-btn:hover {
+  background-color: #555 !important;
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
-  .desktop-only {
+  .desktop-header {
     display: none;
   }
   
-  .mobile-menu-btn {
-    display: flex;
-  }
-  
-  .mobile-menu {
+  .mobile-header {
     display: block;
-  }
-  
-  .nav-brand {
-    width: 100%;
-  }
-  
-  .logo {
-    font-size: 1.25rem;
   }
 }
 
 @media (max-width: 480px) {
-  .header {
+  .mobile-header {
     padding: 0.75rem 0;
   }
   
-  .logo {
+  .mobile-logo {
     font-size: 1.1rem;
-  }
-  
-  .mobile-menu {
-    padding: 0.75rem 0;
   }
 }
 </style>
