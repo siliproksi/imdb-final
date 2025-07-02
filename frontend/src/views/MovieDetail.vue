@@ -79,10 +79,10 @@
             </div>
           </div>
           
-          <!-- Rating Distribution -->
+          <!-- User Ratings & Comments -->
           <div v-if="ratingStats && ratingStats.total_ratings > 0" class="rating-stats-section">
             <div class="stats-header">
-              <h3>{{ $t('movie.ratingDistribution') }}</h3>
+              <h3>{{ $t('movie.userRatings') }}</h3>
               <div class="country-filter">
                 <label>{{ $t('movie.filterByCountry') }}:</label>
                 <select v-model="selectedCountry" @change="onCountryChange" class="country-select">
@@ -112,17 +112,17 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="ratings-section">
-            <h3>{{ $t('movie.userRatings') }}</h3>
-            <div v-if="movie.ratings && movie.ratings.length > 0" class="ratings-list">
-              <div v-for="rating in movie.ratings" :key="rating.id" class="rating-item">
+            
+            <!-- Comments List (filtered by same country) -->
+            <div v-if="ratingStats.ratings && ratingStats.ratings.length > 0" class="ratings-list">
+              <div v-for="rating in ratingStats.ratings" :key="rating.id" class="rating-item">
                 <div class="rating-header">
                   <span class="user-email">{{ rating.user.email }}</span>
+                  <span v-if="rating.user.country" class="user-country">({{ getLocalizedCountry(rating.user.country) }})</span>
                   <span class="rating-score">⭐ {{ rating.rating }}/10</span>
                 </div>
                 <p v-if="rating.comment" class="rating-comment">{{ rating.comment }}</p>
+                <div class="rating-date">{{ formatDate(rating.created_at) }}</div>
               </div>
             </div>
             <div v-else class="no-ratings">
@@ -320,6 +320,15 @@ export default {
     
     async onCountryChange() {
       await this.fetchRatingStats(this.selectedCountry)
+    },
+    
+    formatDate(dateString) {
+      const date = new Date(dateString)
+      return date.toLocaleDateString(this.$i18n.locale, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
     }
   }
 }
@@ -532,9 +541,22 @@ export default {
   color: #f5c518;
 }
 
+.user-country {
+  color: #ccc;
+  font-weight: normal;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+}
+
 .rating-comment {
   color: #ddd;
   line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+.rating-date {
+  color: #888;
+  font-size: 0.8rem;
 }
 
 .no-ratings {
@@ -578,6 +600,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-bottom: 2rem;
 }
 
 .histogram-bar {
