@@ -22,8 +22,8 @@ services:
     environment:
       DATABASE_URL: postgresql://imdb_user:imdb_password@db:5432/imdb_clone
       SECRET_KEY: your-secret-key-here
-      GOOGLE_CLIENT_ID: your-google-client-id
-      GOOGLE_CLIENT_SECRET: your-google-client-secret
+      GOOGLE_CLIENT_ID: 19959323738-2lv4h95g32fdm07oh2q12c67hj27u0r1.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
     depends_on:
       - db
     volumes:
@@ -39,6 +39,7 @@ services:
       - "3000:3000"
     environment:
       VUE_APP_API_URL: http://localhost:8000
+      VUE_APP_GOOGLE_CLIENT_ID: 19959323738-2lv4h95g32fdm07oh2q12c67hj27u0r1.apps.googleusercontent.com
     volumes:
       - ./frontend:/app
       - /app/node_modules

@@ -38,7 +38,8 @@
         </form>
         
         <div class="oauth-section">
-          <button @click="loginWithGoogle" class="google-btn">
+          <div id="google-signin-button"></div>
+          <button @click="loginWithGoogle" class="google-btn" style="display: none;">
             {{ $t('login.googleLogin') }}
           </button>
         </div>
@@ -72,6 +73,13 @@ export default {
     ...mapState(['loading'])
   },
   
+  mounted() {
+    // Initialize Google Sign-In after component is mounted
+    this.$nextTick(() => {
+      this.initializeGoogleSignIn()
+    })
+  },
+  
   methods: {
     ...mapActions(['login']),
     
@@ -92,17 +100,34 @@ export default {
     },
     
     loginWithGoogle() {
-      // Initialize Google Sign-In
+      // This function is now handled by the mounted Google button
+      console.log('Google button clicked')
+    },
+    
+    initializeGoogleSignIn() {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID || 'demo-client-id',
-          callback: this.handleGoogleCallback
+          client_id: '19959323738-2lv4h95g32fdm07oh2q12c67hj27u0r1.apps.googleusercontent.com',
+          callback: this.handleGoogleCallback,
+          auto_select: false,
+          cancel_on_tap_outside: true
         })
         
-        window.google.accounts.id.prompt()
+        // Render the button
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-button'),
+          {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'signin_with',
+            logo_alignment: 'left'
+          }
+        )
       } else {
-        // Fallback for demo - show info message
-        alert('Google OAuth requires proper client ID configuration. This is a demo setup.')
+        console.error('Google Sign-In library not loaded')
+        // Show fallback button
+        document.querySelector('.google-btn').style.display = 'block'
       }
     },
     
@@ -273,6 +298,12 @@ h2 {
 .oauth-section {
   margin: 2rem 0;
   text-align: center;
+}
+
+#google-signin-button {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .google-btn {
