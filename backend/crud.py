@@ -1,5 +1,6 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_, desc
+from fastapi import HTTPException
 import models
 import schemas
 import auth
@@ -17,6 +18,19 @@ def create_user(db: Session, user: schemas.UserCreate):
         hashed_password=hashed_password,
         country=user.country,
         city=user.city
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def create_google_user(db: Session, user_info: dict):
+    """Create a new user from Google OAuth info"""
+    db_user = models.User(
+        email=user_info['email'],
+        google_id=user_info['google_id'],
+        photo_url=user_info.get('picture', ''),
+        hashed_password=None  # No password for Google users
     )
     db.add(db_user)
     db.commit()
@@ -95,6 +109,11 @@ def create_rating(db: Session, rating: schemas.RatingCreate, movie_id: int, user
         return db_rating
 
 def add_to_watchlist(db: Session, movie_id: int, user_id: int):
+    # Check if movie exists
+    movie = db.query(models.Movie).filter(models.Movie.id == movie_id).first()
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    
     # Check if already in watchlist
     existing = db.query(models.Watchlist).filter(
         models.Watchlist.user_id == user_id,
@@ -102,7 +121,7 @@ def add_to_watchlist(db: Session, movie_id: int, user_id: int):
     ).first()
     
     if existing:
-        return {"message": "Already in watchlist"}
+        raise HTTPException(status_code=400, detail="Movie already in your watchlist")
     
     db_watchlist = models.Watchlist(user_id=user_id, movie_id=movie_id)
     db.add(db_watchlist)
@@ -111,7 +130,23 @@ def add_to_watchlist(db: Session, movie_id: int, user_id: int):
     return {"message": "Added to watchlist"}
 
 def get_user_watchlist(db: Session, user_id: int):
-    return db.query(models.Watchlist).filter(models.Watchlist.user_id == user_id).all()
+    return db.query(models.Watchlist).options(
+        joinedload(models.Watchlist.movie)
+    ).filter(models.Watchlist.user_id == user_id).all()
+
+def remove_from_watchlist(db: Session, watchlist_id: int, user_id: int):
+    """Remove item from user's watchlist"""
+    watchlist_item = db.query(models.Watchlist).filter(
+        models.Watchlist.id == watchlist_id,
+        models.Watchlist.user_id == user_id
+    ).first()
+    
+    if not watchlist_item:
+        raise HTTPException(status_code=404, detail="Item not found in your watchlist")
+    
+    db.delete(watchlist_item)
+    db.commit()
+    return {"message": "Removed from watchlist"}
 
 def calculate_popularity(movie, avg_rating, total_ratings):
     # Business logic for popularity calculation

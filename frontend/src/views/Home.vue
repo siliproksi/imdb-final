@@ -3,7 +3,7 @@
     <div class="hero-section">
       <div class="container">
         <h1>{{ $t('home.title') }}</h1>
-        <p>Discover amazing movies and share your thoughts</p>
+        <p>{{ $t('home.subtitle') }}</p>
       </div>
     </div>
     
@@ -14,7 +14,7 @@
         </div>
         
         <div v-if="loading" class="loading">
-          Loading movies...
+          {{ $t('movie.loading') }}
         </div>
         
         <div v-else class="movies-slider">
@@ -83,15 +83,27 @@ export default {
     async addToWatchlist(movieId) {
       try {
         await api.post(`/movies/${movieId}/watchlist`)
-        this.$toast?.success('Added to watchlist!')
+        alert('Added to watchlist!')
       } catch (error) {
         console.error('Error adding to watchlist:', error)
-        this.$toast?.error('Failed to add to watchlist')
+        let errorMessage = 'Failed to add to watchlist'
+        
+        if (error.response?.status === 400) {
+          errorMessage = 'Movie already in your watchlist'
+        } else if (error.response?.status === 401) {
+          errorMessage = 'Please log in to add movies to your watchlist'
+        } else if (error.response?.status === 404) {
+          errorMessage = 'Movie not found'
+        } else if (error.response?.data?.detail) {
+          errorMessage = error.response.data.detail
+        }
+        
+        alert(errorMessage)
       }
     },
     
     truncateSummary(summary) {
-      if (!summary) return 'No summary available'
+      if (!summary) return this.$t('common.noSummary')
       return summary.length > 120 ? summary.substring(0, 120) + '...' : summary
     }
   }
@@ -121,12 +133,6 @@ export default {
   color: #ccc;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
 .movies-section {
   padding: 3rem 0;
 }
@@ -149,7 +155,7 @@ export default {
 
 .movies-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
 }
 
@@ -164,6 +170,66 @@ export default {
 .movie-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2.5rem 0;
+  }
+  
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+  
+  .hero-section p {
+    font-size: 1.1rem;
+  }
+  
+  .movies-section {
+    padding: 2rem 0;
+  }
+  
+  .section-header h2 {
+    font-size: 1.75rem;
+  }
+  
+  .movies-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 2rem 0;
+  }
+  
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-section p {
+    font-size: 1rem;
+  }
+  
+  .movies-section {
+    padding: 1.5rem 0;
+  }
+  
+  .section-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .movies-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .loading {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
 }
 
 .movie-image {

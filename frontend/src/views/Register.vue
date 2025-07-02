@@ -2,11 +2,11 @@
   <div class="register-page">
     <div class="container">
       <div class="register-form-container">
-        <h2>{{ $t('nav.register') }}</h2>
+        <h2>{{ $t('register.title') }}</h2>
         
         <form @submit.prevent="handleRegister" class="register-form">
           <div class="form-group">
-            <label for="email">Email *</label>
+            <label for="email">{{ $t('register.email') }} *</label>
             <input
               id="email"
               v-model="form.email"
@@ -17,7 +17,7 @@
           </div>
           
           <div class="form-group">
-            <label for="password">Password *</label>
+            <label for="password">{{ $t('register.password') }} *</label>
             <input
               id="password"
               v-model="form.password"
@@ -26,12 +26,12 @@
               class="form-input"
             />
             <small class="password-help">
-              Password must be at least 8 characters long, contain 1 number and 1 special character
+              {{ $t('register.passwordHelp') }}
             </small>
           </div>
           
           <div class="form-group">
-            <label for="country">Country</label>
+            <label for="country">{{ $t('register.country') }}</label>
             <input
               id="country"
               v-model="form.country"
@@ -41,7 +41,7 @@
           </div>
           
           <div class="form-group">
-            <label for="city">City</label>
+            <label for="city">{{ $t('register.city') }}</label>
             <input
               id="city"
               v-model="form.city"
@@ -51,7 +51,7 @@
           </div>
           
           <div class="form-group">
-            <label for="photo">Profile Photo (Optional)</label>
+            <label for="photo">{{ $t('register.photo') }}</label>
             <input
               id="photo"
               type="file"
@@ -62,21 +62,22 @@
           </div>
           
           <button type="submit" :disabled="loading" class="submit-btn">
-            {{ loading ? 'Creating Account...' : $t('nav.register') }}
+            {{ loading ? $t('register.creatingAccount') : $t('register.registerButton') }}
           </button>
           
           <div v-if="error" class="error-message">
             {{ error }}
+            <button type="button" @click="clearError" class="error-close">×</button>
           </div>
           
           <div v-if="success" class="success-message">
-            Account created successfully! You can now log in.
+            {{ $t('register.successMessage') }}
           </div>
         </form>
         
         <div class="login-link">
-          <p>Already have an account? 
-            <router-link to="/login">{{ $t('nav.login') }}</router-link>
+          <p>{{ $t('register.hasAccount') }} 
+            <router-link to="/login">{{ $t('register.loginLink') }}</router-link>
           </p>
         </div>
       </div>
@@ -115,19 +116,23 @@ export default {
     },
     
     async handleRegister() {
-      this.error = ''
-      this.success = false
-      
       const result = await this.register(this.form)
       
       if (result.success) {
+        this.error = '' // Only clear on success
         this.success = true
         setTimeout(() => {
           this.$router.push('/login')
         }, 2000)
       } else {
         this.error = result.message
+        this.success = false
+        // Error persists until manually dismissed by user
       }
+    },
+    
+    clearError() {
+      this.error = ''
     }
   }
 }
@@ -154,6 +159,39 @@ export default {
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .register-page {
+    padding: 1rem 0;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+  
+  .container {
+    max-width: 100%;
+  }
+  
+  .register-form-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-page {
+    padding: 1rem 0;
+  }
+  
+  .register-form-container {
+    padding: 1.25rem;
+    margin: 0;
+    border-radius: 6px;
+  }
+  
+  .form-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
 
 h2 {
@@ -223,11 +261,39 @@ h2 {
 
 .error-message {
   margin-top: 1rem;
-  padding: 0.75rem;
+  padding: 0.75rem 2.5rem 0.75rem 0.75rem;
   background-color: #dc3545;
   color: white;
   border-radius: 4px;
-  text-align: center;
+  border: 1px solid #c82333;
+  position: relative;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.error-close {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.4rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.error-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
 }
 
 .success-message {

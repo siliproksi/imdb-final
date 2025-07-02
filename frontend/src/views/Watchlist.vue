@@ -1,21 +1,21 @@
 <template>
   <div class="watchlist-page">
     <div class="container">
-      <h1>My Watchlist</h1>
+      <h1>{{ $t('watchlist.title') }}</h1>
       
       <div v-if="loading" class="loading">
-        Loading your watchlist...
+        {{ $t('watchlist.loading') }}
       </div>
       
-      <div v-else-if="watchlist.length === 0" class="empty-watchlist">
-        <h2>Your watchlist is empty</h2>
-        <p>Start adding movies to your watchlist to keep track of what you want to watch!</p>
-        <router-link to="/" class="browse-btn">Browse Movies</router-link>
+      <div v-else-if="validWatchlistItems.length === 0" class="empty-watchlist">
+        <h2>{{ $t('watchlist.empty') }}</h2>
+        <p>{{ $t('watchlist.emptyMessage') }}</p>
+        <router-link to="/" class="browse-btn">{{ $t('watchlist.browseMovies') }}</router-link>
       </div>
       
       <div v-else class="watchlist-grid">
         <div
-          v-for="item in watchlist"
+          v-for="item in validWatchlistItems"
           :key="item.id"
           class="watchlist-item"
         >
@@ -31,12 +31,12 @@
                 <span class="rating">⭐ {{ item.movie.imdb_score || 'N/A' }}</span>
               </div>
               <p class="summary">{{ truncateSummary(item.movie.summary) }}</p>
-              <p class="added-date">Added: {{ formatDate(item.added_at) }}</p>
+              <p class="added-date">{{ $t('watchlist.addedDate') }} {{ formatDate(item.added_at) }}</p>
             </div>
           </div>
           
           <button @click="removeFromWatchlist(item.id)" class="remove-btn">
-            Remove from Watchlist
+            {{ $t('watchlist.removeButton') }}
           </button>
         </div>
       </div>
@@ -53,6 +53,12 @@ export default {
     return {
       watchlist: [],
       loading: false
+    }
+  },
+  
+  computed: {
+    validWatchlistItems() {
+      return this.watchlist.filter(item => item.movie)
     }
   },
   
@@ -83,14 +89,25 @@ export default {
       try {
         await api.delete(`/watchlist/${watchlistId}`)
         this.watchlist = this.watchlist.filter(item => item.id !== watchlistId)
+        alert('Removed from watchlist!')
       } catch (error) {
         console.error('Error removing from watchlist:', error)
-        alert('Failed to remove from watchlist')
+        let errorMessage = 'Failed to remove from watchlist'
+        
+        if (error.response?.status === 401) {
+          errorMessage = 'Please log in to manage your watchlist'
+        } else if (error.response?.status === 404) {
+          errorMessage = 'Item not found in your watchlist'
+        } else if (error.response?.data?.detail) {
+          errorMessage = error.response.data.detail
+        }
+        
+        alert(errorMessage)
       }
     },
     
     truncateSummary(summary) {
-      if (!summary) return 'No summary available'
+      if (!summary) return this.$t('common.noSummary')
       return summary.length > 120 ? summary.substring(0, 120) + '...' : summary
     },
     
@@ -174,6 +191,95 @@ h1 {
 .watchlist-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .watchlist-page {
+    padding: 1.5rem 0;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  .watchlist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .empty-watchlist {
+    padding: 2rem;
+  }
+  
+  .empty-watchlist h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .watchlist-page {
+    padding: 1rem 0;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .watchlist-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .movie-image {
+    height: 300px;
+  }
+  
+  .movie-info {
+    padding: 0.75rem;
+  }
+  
+  .movie-info h3 {
+    font-size: 1.1rem;
+  }
+  
+  .movie-meta {
+    font-size: 0.85rem;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+  
+  .summary {
+    font-size: 0.85rem;
+  }
+  
+  .added-date {
+    font-size: 0.75rem;
+  }
+  
+  .remove-btn {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .empty-watchlist {
+    padding: 1.5rem;
+  }
+  
+  .empty-watchlist h2 {
+    font-size: 1.25rem;
+  }
+  
+  .empty-watchlist p {
+    font-size: 0.9rem;
+  }
+  
+  .browse-btn {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
 }
 
 .movie-card {

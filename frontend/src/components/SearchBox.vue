@@ -2,9 +2,9 @@
   <div class="search-container">
     <div class="search-input-container">
       <select v-model="searchType" class="search-type">
-        <option value="all">All</option>
-        <option value="movies">Movies</option>
-        <option value="actors">Actors</option>
+        <option value="all">{{ $t('search.all') }}</option>
+        <option value="movies">{{ $t('search.movies') }}</option>
+        <option value="actors">{{ $t('search.actors') }}</option>
       </select>
       
       <input
@@ -13,11 +13,11 @@
         @focus="showDropdown = true"
         @blur="hideDropdown"
         type="text"
-        placeholder="Search movies, actors..."
+        :placeholder="$t('search.placeholder')"
         class="search-input"
       />
       
-      <button @click="performSearch" class="search-btn">Search</button>
+      <button @click="performSearch" class="search-btn">{{ $t('search.searchButton') }}</button>
     </div>
     
     <div v-if="showDropdown && searchResults.length > 0" class="search-dropdown">
@@ -136,6 +136,7 @@ export default {
   border: none;
   outline: none;
   color: #333;
+  font-size: 16px; /* Prevents zoom on iOS */
 }
 
 .search-btn {
@@ -145,10 +146,78 @@ export default {
   cursor: pointer;
   font-weight: bold;
   color: #000;
+  white-space: nowrap;
 }
 
 .search-btn:hover {
   background-color: #e6b800;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .search-input-container {
+    border-radius: 6px;
+  }
+  
+  .search-type {
+    padding: 0.6rem;
+    min-width: 70px;
+    font-size: 0.9rem;
+  }
+  
+  .search-input {
+    padding: 0.6rem;
+    font-size: 16px;
+  }
+  
+  .search-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-input-container {
+    border-radius: 8px;
+  }
+  
+  .search-type {
+    padding: 0.5rem;
+    min-width: 60px;
+    font-size: 0.85rem;
+  }
+  
+  .search-input {
+    padding: 0.5rem;
+    font-size: 16px;
+  }
+  
+  .search-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .search-dropdown {
+    border-radius: 0 0 8px 8px;
+  }
+  
+  .search-result-item {
+    padding: 0.6rem;
+  }
+  
+  .result-image {
+    width: 35px;
+    height: 50px;
+    margin-right: 0.5rem;
+  }
+  
+  .result-title {
+    font-size: 0.9rem;
+  }
+  
+  .result-subtitle {
+    font-size: 0.8rem;
+  }
 }
 
 .search-dropdown {

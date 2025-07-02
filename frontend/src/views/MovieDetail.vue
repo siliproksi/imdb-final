@@ -19,32 +19,32 @@
             
             <div class="movie-actions">
               <button v-if="!user" @click="redirectToLogin" class="action-btn primary">
-                Rate Movie
+                {{ $t('movie.rateMovie') }}
               </button>
               <button v-else @click="showRatingModal = true" class="action-btn primary">
-                Rate Movie
+                {{ $t('movie.rateMovie') }}
               </button>
               
               <button v-if="!user" @click="redirectToLogin" class="action-btn secondary">
-                Add to Watchlist
+                {{ $t('movie.addToWatchlist') }}
               </button>
               <button v-else @click="addToWatchlist" class="action-btn secondary">
-                Add to Watchlist
+                {{ $t('movie.addToWatchlist') }}
               </button>
             </div>
             
             <div class="movie-stats">
               <div class="stat">
                 <h3>{{ movie.average_rating?.toFixed(1) || 'N/A' }}</h3>
-                <p>Average Rating</p>
+                <p>{{ $t('movie.averageRating') }}</p>
               </div>
               <div class="stat">
                 <h3>{{ movie.total_ratings || 0 }}</h3>
-                <p>Total Ratings</p>
+                <p>{{ $t('movie.totalRatings') }}</p>
               </div>
               <div class="stat">
                 <h3>{{ movie.popularity_score?.toFixed(0) || 0 }}</h3>
-                <p>Popularity Score</p>
+                <p>{{ $t('movie.popularityScore') }}</p>
               </div>
             </div>
           </div>
@@ -56,7 +56,7 @@
       <div class="container">
         <div class="details-grid">
           <div class="trailer-section" v-if="movie.trailer_url">
-            <h3>Trailer</h3>
+            <h3>{{ $t('movie.trailer') }}</h3>
             <div class="trailer-container">
               <iframe 
                 :src="getYouTubeEmbedUrl(movie.trailer_url)"
@@ -67,7 +67,7 @@
           </div>
           
           <div class="cast-section" v-if="movie.actors && movie.actors.length > 0">
-            <h3>Cast</h3>
+            <h3>{{ $t('movie.cast') }}</h3>
             <div class="cast-grid">
               <div v-for="actor in movie.actors" :key="actor.actor.id" class="cast-member">
                 <img :src="actor.actor.photo_url || '/placeholder-actor.jpg'" :alt="actor.actor.name" />
@@ -80,7 +80,7 @@
           </div>
           
           <div class="ratings-section">
-            <h3>User Ratings & Comments</h3>
+            <h3>{{ $t('movie.userRatings') }}</h3>
             <div v-if="movie.ratings && movie.ratings.length > 0" class="ratings-list">
               <div v-for="rating in movie.ratings" :key="rating.id" class="rating-item">
                 <div class="rating-header">
@@ -91,7 +91,7 @@
               </div>
             </div>
             <div v-else class="no-ratings">
-              <p>No ratings yet. Be the first to rate this movie!</p>
+              <p>{{ $t('movie.noRatings') }}</p>
             </div>
           </div>
         </div>
@@ -101,19 +101,19 @@
     <!-- Rating Modal -->
     <div v-if="showRatingModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
-        <h3>Rate Movie</h3>
+        <h3>{{ $t('movie.rateMovie') }}</h3>
         <form @submit.prevent="submitRating">
           <div class="form-group">
-            <label>Rating (1-10)</label>
+            <label>{{ $t('movie.rating') }}</label>
             <input v-model.number="ratingForm.rating" type="number" min="1" max="10" step="0.1" required />
           </div>
           <div class="form-group">
-            <label>Comment (Optional)</label>
+            <label>{{ $t('movie.comment') }}</label>
             <textarea v-model="ratingForm.comment" rows="4"></textarea>
           </div>
           <div class="modal-actions">
-            <button type="button" @click="closeModal" class="btn-cancel">Cancel</button>
-            <button type="submit" class="btn-submit">Submit Rating</button>
+            <button type="button" @click="closeModal" class="btn-cancel">{{ $t('movie.cancel') }}</button>
+            <button type="submit" class="btn-submit">{{ $t('movie.submitRating') }}</button>
           </div>
         </form>
       </div>
@@ -121,7 +121,7 @@
   </div>
   
   <div v-else class="loading">
-    Loading movie details...
+    {{ $t('movie.loading') }}
   </div>
 </template>
 
@@ -183,7 +183,19 @@ export default {
         alert('Added to watchlist!')
       } catch (error) {
         console.error('Error adding to watchlist:', error)
-        alert('Failed to add to watchlist')
+        let errorMessage = 'Failed to add to watchlist'
+        
+        if (error.response?.status === 400) {
+          errorMessage = 'Movie already in your watchlist'
+        } else if (error.response?.status === 401) {
+          errorMessage = 'Please log in to add movies to your watchlist'
+        } else if (error.response?.status === 404) {
+          errorMessage = 'Movie not found'
+        } else if (error.response?.data?.detail) {
+          errorMessage = error.response.data.detail
+        }
+        
+        alert(errorMessage)
       }
     },
     
@@ -195,12 +207,24 @@ export default {
     async submitRating() {
       try {
         await api.post(`/movies/${this.movie.id}/rate`, this.ratingForm)
-        alert('Rating submitted!')
+        alert('Rating submitted successfully!')
         this.closeModal()
         await this.fetchMovie() // Refresh movie data
       } catch (error) {
         console.error('Error submitting rating:', error)
-        alert('Failed to submit rating')
+        let errorMessage = 'Failed to submit rating'
+        
+        if (error.response?.status === 400) {
+          errorMessage = 'Invalid rating. Please enter a rating between 1 and 10.'
+        } else if (error.response?.status === 401) {
+          errorMessage = 'Please log in to rate movies'
+        } else if (error.response?.status === 404) {
+          errorMessage = 'Movie not found'
+        } else if (error.response?.data?.detail) {
+          errorMessage = error.response.data.detail
+        }
+        
+        alert(errorMessage)
       }
     }
   }
@@ -497,13 +521,129 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .movie-hero {
+    padding: 2rem 0;
+  }
+  
   .movie-hero-content {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: 2rem;
+  }
+  
+  .movie-poster img {
+    max-width: 250px;
+    margin: 0 auto;
+  }
+  
+  .movie-info h1 {
+    font-size: 2rem;
+  }
+  
+  .movie-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .action-btn {
+    width: 100%;
+    padding: 1rem;
   }
   
   .movie-stats {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .movie-details-section {
+    padding: 2rem 0;
+  }
+  
+  .cast-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  .cast-member img {
+    height: 150px;
+  }
+  
+  .modal-content {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-hero {
+    padding: 1.5rem 0;
+  }
+  
+  .movie-hero-content {
+    gap: 1.5rem;
+  }
+  
+  .movie-poster img {
+    max-width: 200px;
+  }
+  
+  .movie-info h1 {
+    font-size: 1.75rem;
+  }
+  
+  .movie-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .movie-summary {
+    font-size: 1rem;
+  }
+  
+  .movie-stats {
+    text-align: center;
+  }
+  
+  .cast-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
+  
+  .cast-member img {
+    height: 120px;
+  }
+  
+  .cast-info h4 {
+    font-size: 0.9rem;
+  }
+  
+  .cast-info p {
+    font-size: 0.8rem;
+  }
+  
+  .rating-item {
+    padding: 0.75rem;
+  }
+  
+  .rating-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .modal-content {
+    margin: 0.5rem;
+    padding: 1.25rem;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
   }
 }
 </style>

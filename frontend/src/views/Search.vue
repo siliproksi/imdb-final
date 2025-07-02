@@ -1,16 +1,16 @@
 <template>
   <div class="search-page">
     <div class="container">
-      <h1>Search Results</h1>
-      <p class="search-query">Results for: "{{ $route.query.q }}"</p>
+      <h1>{{ $t('search.title') }}</h1>
+      <p class="search-query">{{ $t('search.resultsFor') }} "{{ $route.query.q }}"</p>
       
       <div v-if="loading" class="loading">
-        Searching...
+        {{ $t('search.searching') }}
       </div>
       
       <div v-else>
         <div v-if="results.movies && results.movies.length > 0" class="search-section">
-          <h2>Movies</h2>
+          <h2>{{ $t('search.movies') }}</h2>
           <div class="results-grid">
             <div
               v-for="movie in results.movies"
@@ -30,7 +30,7 @@
         </div>
         
         <div v-if="results.actors && results.actors.length > 0" class="search-section">
-          <h2>Actors</h2>
+          <h2>{{ $t('search.actors') }}</h2>
           <div class="results-grid">
             <div
               v-for="actor in results.actors"
@@ -47,8 +47,8 @@
         </div>
         
         <div v-if="(!results.movies || results.movies.length === 0) && (!results.actors || results.actors.length === 0)" class="no-results">
-          <h2>No results found</h2>
-          <p>Try searching with different keywords.</p>
+          <h2>{{ $t('search.noResults') }}</h2>
+          <p>{{ $t('search.tryDifferent') }}</p>
         </div>
       </div>
     </div>
@@ -118,7 +118,7 @@ export default {
     },
     
     truncateText(text) {
-      if (!text) return 'No description available'
+      if (!text) return this.$t('common.noDescription')
       return text.length > 150 ? text.substring(0, 150) + '...' : text
     }
   }
@@ -191,11 +191,74 @@ h1 {
   width: 120px;
   height: 180px;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .result-info {
   padding: 1rem;
   flex: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .search-page {
+    padding: 1.5rem 0;
+  }
+  
+  .results-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .result-item {
+    flex-direction: column;
+  }
+  
+  .result-item img {
+    width: 100%;
+    height: 200px;
+  }
+  
+  .result-info {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-page {
+    padding: 1rem 0;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  .results-grid {
+    gap: 1rem;
+  }
+  
+  .result-item img {
+    height: 150px;
+  }
+  
+  .result-info {
+    padding: 0.75rem;
+  }
+  
+  .result-info h3 {
+    font-size: 1rem;
+  }
+  
+  .year,
+  .rating,
+  .bio {
+    font-size: 0.85rem;
+  }
+  
+  .summary,
+  .bio {
+    font-size: 0.9rem;
+  }
 }
 
 .result-info h3 {
