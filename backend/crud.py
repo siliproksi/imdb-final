@@ -41,14 +41,25 @@ def create_google_user(db: Session, user_info: dict):
 def get_movies(db: Session, skip: int = 0, limit: int = 20, lang: str = "en"):
     movies = db.query(models.Movie).order_by(desc(models.Movie.popularity_score)).offset(skip).limit(limit).all()
     
-    # Apply language-specific title and summary
+    # Create response with appropriate language without modifying database objects
+    result = []
     for movie in movies:
-        if lang == "tr" and movie.title_tr:
-            movie.title = movie.title_tr
-        if lang == "tr" and movie.summary_tr:
-            movie.summary = movie.summary_tr
+        movie_dict = {
+            "id": movie.id,
+            "title": movie.title_tr if (lang == "tr" and movie.title_tr) else movie.title,
+            "summary": movie.summary_tr if (lang == "tr" and movie.summary_tr) else movie.summary,
+            "release_year": movie.release_year,
+            "duration": movie.duration,
+            "image_url": movie.image_url,
+            "trailer_url": movie.trailer_url,
+            "imdb_score": movie.imdb_score,
+            "popularity_score": movie.popularity_score,
+            "view_count": movie.view_count,
+            "created_at": movie.created_at
+        }
+        result.append(movie_dict)
     
-    return movies
+    return result
 
 def get_actor(db: Session, actor_id: int):
     actor = db.query(models.Actor).options(
@@ -59,12 +70,6 @@ def get_actor(db: Session, actor_id: int):
 def get_movie(db: Session, movie_id: int, lang: str = "en"):
     movie = db.query(models.Movie).filter(models.Movie.id == movie_id).first()
     if movie:
-        # Apply language-specific title and summary
-        if lang == "tr" and movie.title_tr:
-            movie.title = movie.title_tr
-        if lang == "tr" and movie.summary_tr:
-            movie.summary = movie.summary_tr
-            
         # Increment view count
         movie.view_count += 1
         db.commit()
@@ -78,11 +83,25 @@ def get_movie(db: Session, movie_id: int, lang: str = "en"):
         movie.popularity_score = popularity
         db.commit()
         
-        # Add calculated fields
-        movie.average_rating = avg_rating
-        movie.total_ratings = total_ratings
+        # Create response with appropriate language without modifying database object
+        movie_dict = {
+            "id": movie.id,
+            "title": movie.title_tr if (lang == "tr" and movie.title_tr) else movie.title,
+            "summary": movie.summary_tr if (lang == "tr" and movie.summary_tr) else movie.summary,
+            "release_year": movie.release_year,
+            "duration": movie.duration,
+            "image_url": movie.image_url,
+            "trailer_url": movie.trailer_url,
+            "imdb_score": movie.imdb_score,
+            "popularity_score": movie.popularity_score,
+            "view_count": movie.view_count,
+            "created_at": movie.created_at,
+            "average_rating": avg_rating,
+            "total_ratings": total_ratings
+        }
+        return movie_dict
     
-    return movie
+    return None
 
 def search_movies(db: Session, query: str, search_type: str = "all", limit: int = 10, lang: str = "en"):
     movies = []
@@ -110,12 +129,24 @@ def search_movies(db: Session, query: str, search_type: str = "all", limit: int 
             else:
                 movies = title_matches
             
-            # Apply Turkish content
+            # Convert to response format with Turkish content
+            movie_results = []
             for movie in movies:
-                if movie.title_tr:
-                    movie.title = movie.title_tr
-                if movie.summary_tr:
-                    movie.summary = movie.summary_tr
+                movie_dict = {
+                    "id": movie.id,
+                    "title": movie.title_tr if movie.title_tr else movie.title,
+                    "summary": movie.summary_tr if movie.summary_tr else movie.summary,
+                    "release_year": movie.release_year,
+                    "duration": movie.duration,
+                    "image_url": movie.image_url,
+                    "trailer_url": movie.trailer_url,
+                    "imdb_score": movie.imdb_score,
+                    "popularity_score": movie.popularity_score,
+                    "view_count": movie.view_count,
+                    "created_at": movie.created_at
+                }
+                movie_results.append(movie_dict)
+            movies = movie_results
         else:
             # Search English fields: title matches first, then fill with summary matches
             # First get title matches (up to 3)
@@ -136,6 +167,25 @@ def search_movies(db: Session, query: str, search_type: str = "all", limit: int 
                 movies = title_matches + summary_matches
             else:
                 movies = title_matches
+            
+            # Convert to response format
+            movie_results = []
+            for movie in movies:
+                movie_dict = {
+                    "id": movie.id,
+                    "title": movie.title,
+                    "summary": movie.summary,
+                    "release_year": movie.release_year,
+                    "duration": movie.duration,
+                    "image_url": movie.image_url,
+                    "trailer_url": movie.trailer_url,
+                    "imdb_score": movie.imdb_score,
+                    "popularity_score": movie.popularity_score,
+                    "view_count": movie.view_count,
+                    "created_at": movie.created_at
+                }
+                movie_results.append(movie_dict)
+            movies = movie_results
     
     if search_type in ["all", "actors"]:
         actors = db.query(models.Actor).filter(
