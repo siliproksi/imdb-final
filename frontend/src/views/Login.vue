@@ -88,7 +88,8 @@ export default {
       
       if (result.success) {
         this.error = '' // Only clear on success
-        this.$router.push('/')
+        const redirectPath = this.$route.query.redirect || '/'
+        this.$router.push(redirectPath)
       } else {
         this.error = result.message
         // Error persists until manually dismissed by user
@@ -136,7 +137,8 @@ export default {
         const result = await this.$store.dispatch('googleLogin', response.credential)
         
         if (result.success) {
-          this.$router.push('/')
+          const redirectPath = this.$route.query.redirect || '/'
+          this.$router.push(redirectPath)
         } else {
           this.error = result.message
         }

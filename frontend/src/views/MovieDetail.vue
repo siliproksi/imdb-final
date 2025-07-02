@@ -12,7 +12,7 @@
             <div class="movie-meta">
               <span class="year">{{ movie.release_year }}</span>
               <span class="duration">{{ formatDuration(movie.duration) }}</span>
-              <span class="rating">⭐ {{ movie.imdb_score || 'N/A' }}</span>
+              <span class="rating">⭐ {{ movie.imdb_score || 'No ratings' }}</span>
             </div>
             
             <p class="movie-summary">{{ movie.summary }}</p>
@@ -35,7 +35,7 @@
             
             <div class="movie-stats">
               <div class="stat">
-                <h3>{{ movie.average_rating?.toFixed(1) || 'N/A' }}</h3>
+                <h3>{{ movie.average_rating?.toFixed(1) || 'No ratings' }}</h3>
                 <p>{{ $t('movie.averageRating') }}</p>
               </div>
               <div class="stat">
@@ -162,7 +162,7 @@ export default {
     },
     
     formatDuration(minutes) {
-      if (!minutes) return 'N/A'
+      if (!minutes) return 'No duration'
       const hours = Math.floor(minutes / 60)
       const mins = minutes % 60
       return `${hours}h ${mins}m`
@@ -174,7 +174,10 @@ export default {
     },
     
     redirectToLogin() {
-      this.$router.push('/login')
+      this.$router.push({
+        path: '/login',
+        query: { redirect: this.$route.fullPath }
+      })
     },
     
     async addToWatchlist() {

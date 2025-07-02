@@ -28,7 +28,7 @@
               <h3>{{ item.movie.title }}</h3>
               <div class="movie-meta">
                 <span class="year">{{ item.movie.release_year }}</span>
-                <span class="rating">⭐ {{ item.movie.imdb_score || 'N/A' }}</span>
+                <span class="rating">⭐ {{ item.movie.imdb_score || 'No ratings' }}</span>
               </div>
               <p class="summary">{{ truncateSummary(item.movie.summary) }}</p>
               <p class="added-date">{{ $t('watchlist.addedDate') }} {{ formatDate(item.added_at) }}</p>

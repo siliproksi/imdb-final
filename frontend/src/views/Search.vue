@@ -22,7 +22,7 @@
               <div class="result-info">
                 <h3>{{ movie.title }}</h3>
                 <p class="year">{{ movie.release_year }}</p>
-                <p class="rating">⭐ {{ movie.imdb_score || 'N/A' }}</p>
+                <p class="rating">⭐ {{ movie.imdb_score || 'No ratings' }}</p>
                 <p class="summary">{{ truncateText(movie.summary) }}</p>
               </div>
             </div>

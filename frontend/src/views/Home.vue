@@ -9,18 +9,15 @@
     
     <div class="movies-section">
       <div class="container">
-        <div class="section-header">
-          <h2>{{ $t('home.title') }}</h2>
-        </div>
         
         <div v-if="loading" class="loading">
           {{ $t('movie.loading') }}
         </div>
         
         <div v-else class="movies-slider">
-          <div class="movies-grid">
+          <div class="movies-horizontal-scroll">
             <div
-              v-for="movie in movies"
+              v-for="movie in movies.slice(0, 10)"
               :key="movie.id"
               class="movie-card"
               @click="goToMovie(movie.id)"
@@ -42,7 +39,7 @@
                 <div class="movie-meta">
                   <span class="movie-year">{{ movie.release_year }}</span>
                   <span class="movie-rating">
-                    ⭐ {{ movie.imdb_score || 'N/A' }}
+                    ⭐ {{ movie.imdb_score || 'No ratings' }}
                   </span>
                 </div>
                 <p class="movie-summary">{{ truncateSummary(movie.summary) }}</p>
@@ -77,7 +74,10 @@ export default {
     },
     
     redirectToLogin() {
-      this.$router.push('/login')
+      this.$router.push({
+        path: '/login',
+        query: { redirect: this.$route.fullPath }
+      })
     },
     
     async addToWatchlist(movieId) {
@@ -153,10 +153,31 @@ export default {
   padding: 2rem;
 }
 
-.movies-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
+.movies-horizontal-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.movies-horizontal-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.movies-horizontal-scroll::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 4px;
+}
+
+.movies-horizontal-scroll::-webkit-scrollbar-thumb {
+  background: #f5c518;
+  border-radius: 4px;
+}
+
+.movies-horizontal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #e6b800;
 }
 
 .movie-card {
@@ -165,6 +186,8 @@ export default {
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex: 0 0 280px;
+  width: 280px;
 }
 
 .movie-card:hover {
@@ -194,9 +217,13 @@ export default {
     font-size: 1.75rem;
   }
   
-  .movies-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+  .movies-horizontal-scroll {
+    gap: 1rem;
+  }
+  
+  .movie-card {
+    flex: 0 0 250px;
+    width: 250px;
   }
 }
 
@@ -221,9 +248,17 @@ export default {
     font-size: 1.5rem;
   }
   
-  .movies-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .movies-horizontal-scroll {
+    gap: 0.75rem;
+  }
+  
+  .movie-card {
+    flex: 0 0 180px;
+    width: 180px;
+  }
+  
+  .movie-image {
+    height: 270px;
   }
   
   .loading {
