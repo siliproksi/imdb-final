@@ -67,6 +67,19 @@ class Actor(ActorBase):
     class Config:
         from_attributes = True
 
+class MovieActorForActor(BaseModel):
+    movie: Movie
+    character_name: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+class ActorDetail(Actor):
+    movies: List[MovieActorForActor] = []
+    
+    class Config:
+        from_attributes = True
+
 class MovieActor(BaseModel):
     actor: Actor
     character_name: Optional[str] = None

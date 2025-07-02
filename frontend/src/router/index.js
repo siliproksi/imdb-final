@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import MovieDetail from '../views/MovieDetail.vue'
+import ActorDetail from '../views/ActorDetail.vue'
 import Search from '../views/Search.vue'
 import Watchlist from '../views/Watchlist.vue'
 import store from '../store'
@@ -27,6 +28,11 @@ const routes = [
     path: '/movie/:id',
     name: 'MovieDetail',
     component: MovieDetail
+  },
+  {
+    path: '/actor/:id',
+    name: 'ActorDetail',
+    component: ActorDetail
   },
   {
     path: '/search',

@@ -140,6 +140,13 @@ def get_movie(movie_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Movie not found")
     return movie
 
+@app.get("/actors/{actor_id}", response_model=schemas.ActorDetail)
+def get_actor(actor_id: int, db: Session = Depends(get_db)):
+    actor = crud.get_actor(db, actor_id=actor_id)
+    if actor is None:
+        raise HTTPException(status_code=404, detail="Actor not found")
+    return actor
+
 @app.get("/search")
 def search_movies(q: str, search_type: str = "all", limit: int = 10, db: Session = Depends(get_db)):
     if len(q) < 3:

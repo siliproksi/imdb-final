@@ -36,6 +36,7 @@
               v-for="actor in results.actors"
               :key="actor.id"
               class="result-item"
+              @click="goToActor(actor.id)"
             >
               <img :src="actor.photo_url || '/placeholder-actor.jpg'" :alt="actor.name" />
               <div class="result-info">
@@ -115,6 +116,10 @@ export default {
     
     goToMovie(movieId) {
       this.$router.push(`/movie/${movieId}`)
+    },
+    
+    goToActor(actorId) {
+      this.$router.push(`/actor/${actorId}`)
     },
     
     truncateText(text) {

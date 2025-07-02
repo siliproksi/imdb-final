@@ -41,6 +41,12 @@ def create_google_user(db: Session, user_info: dict):
 def get_movies(db: Session, skip: int = 0, limit: int = 20):
     return db.query(models.Movie).order_by(desc(models.Movie.popularity_score)).offset(skip).limit(limit).all()
 
+def get_actor(db: Session, actor_id: int):
+    actor = db.query(models.Actor).options(
+        joinedload(models.Actor.movies).joinedload(models.MovieActor.movie)
+    ).filter(models.Actor.id == actor_id).first()
+    return actor
+
 def get_movie(db: Session, movie_id: int):
     movie = db.query(models.Movie).filter(models.Movie.id == movie_id).first()
     if movie:

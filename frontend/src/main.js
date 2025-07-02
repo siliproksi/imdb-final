@@ -82,6 +82,11 @@ const messages = {
       addedDate: 'Added:',
       removeButton: 'Remove from Watchlist'
     },
+    actor: {
+      noBio: 'No biography available',
+      appearsIn: 'Appears in',
+      loading: 'Loading actor details...'
+    },
     common: {
       year: 'Year',
       duration: 'Duration',
@@ -165,6 +170,11 @@ const messages = {
       browseMovies: 'Filmlere Göz At',
       addedDate: 'Eklenme Tarihi:',
       removeButton: 'İzleme Listesinden Çıkar'
+    },
+    actor: {
+      noBio: 'Biyografi mevcut değil',
+      appearsIn: 'Oynadığı filmler',
+      loading: 'Oyuncu detayları yükleniyor...'
     },
     common: {
       year: 'Yıl',
