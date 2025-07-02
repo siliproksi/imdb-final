@@ -185,10 +185,12 @@ export default createStore({
       }
     },
     
-    async fetchMovies({ commit }) {
+    async fetchMovies({ commit }, lang = 'en') {
       try {
         commit('SET_LOADING', true)
-        const response = await api.get('/movies')
+        const response = await api.get('/movies', {
+          params: { lang }
+        })
         commit('SET_MOVIES', response.data)
       } catch (error) {
         console.error('Error fetching movies:', error)

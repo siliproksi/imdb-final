@@ -130,12 +130,12 @@ def google_login(google_data: schemas.GoogleLogin, db: Session = Depends(get_db)
         )
 
 @app.get("/movies", response_model=list[schemas.Movie])
-def get_movies(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
-    return crud.get_movies(db, skip=skip, limit=limit)
+def get_movies(skip: int = 0, limit: int = 20, lang: str = "en", db: Session = Depends(get_db)):
+    return crud.get_movies(db, skip=skip, limit=limit, lang=lang)
 
 @app.get("/movies/{movie_id}", response_model=schemas.MovieDetail)
-def get_movie(movie_id: int, db: Session = Depends(get_db)):
-    movie = crud.get_movie(db, movie_id=movie_id)
+def get_movie(movie_id: int, lang: str = "en", db: Session = Depends(get_db)):
+    movie = crud.get_movie(db, movie_id=movie_id, lang=lang)
     if movie is None:
         raise HTTPException(status_code=404, detail="Movie not found")
     return movie
@@ -148,10 +148,10 @@ def get_actor(actor_id: int, db: Session = Depends(get_db)):
     return actor
 
 @app.get("/search")
-def search_movies(q: str, search_type: str = "all", limit: int = 10, db: Session = Depends(get_db)):
+def search_movies(q: str, search_type: str = "all", limit: int = 10, lang: str = "en", db: Session = Depends(get_db)):
     if len(q) < 3:
         limit = 3
-    return crud.search_movies(db, query=q, search_type=search_type, limit=limit)
+    return crud.search_movies(db, query=q, search_type=search_type, limit=limit, lang=lang)
 
 @app.post("/movies/{movie_id}/rate")
 def rate_movie(

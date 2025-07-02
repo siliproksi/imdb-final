@@ -150,10 +150,18 @@ export default {
     await this.fetchMovie()
   },
   
+  watch: {
+    '$i18n.locale'() {
+      this.fetchMovie()
+    }
+  },
+  
   methods: {
     async fetchMovie() {
       try {
-        const response = await api.get(`/movies/${this.$route.params.id}`)
+        const response = await api.get(`/movies/${this.$route.params.id}`, {
+          params: { lang: this.$i18n.locale }
+        })
         this.movie = response.data
       } catch (error) {
         console.error('Error fetching movie:', error)

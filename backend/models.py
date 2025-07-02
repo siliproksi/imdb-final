@@ -26,7 +26,9 @@ class Movie(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False, index=True)
+    title_tr = Column(String)  # Turkish title
     summary = Column(Text)
+    summary_tr = Column(Text)  # Turkish summary
     release_year = Column(Integer)
     duration = Column(Integer)  # in minutes
     image_url = Column(String)

@@ -38,8 +38,17 @@ def create_google_user(db: Session, user_info: dict):
     db.refresh(db_user)
     return db_user
 
-def get_movies(db: Session, skip: int = 0, limit: int = 20):
-    return db.query(models.Movie).order_by(desc(models.Movie.popularity_score)).offset(skip).limit(limit).all()
+def get_movies(db: Session, skip: int = 0, limit: int = 20, lang: str = "en"):
+    movies = db.query(models.Movie).order_by(desc(models.Movie.popularity_score)).offset(skip).limit(limit).all()
+    
+    # Apply language-specific title and summary
+    for movie in movies:
+        if lang == "tr" and movie.title_tr:
+            movie.title = movie.title_tr
+        if lang == "tr" and movie.summary_tr:
+            movie.summary = movie.summary_tr
+    
+    return movies
 
 def get_actor(db: Session, actor_id: int):
     actor = db.query(models.Actor).options(
@@ -47,9 +56,15 @@ def get_actor(db: Session, actor_id: int):
     ).filter(models.Actor.id == actor_id).first()
     return actor
 
-def get_movie(db: Session, movie_id: int):
+def get_movie(db: Session, movie_id: int, lang: str = "en"):
     movie = db.query(models.Movie).filter(models.Movie.id == movie_id).first()
     if movie:
+        # Apply language-specific title and summary
+        if lang == "tr" and movie.title_tr:
+            movie.title = movie.title_tr
+        if lang == "tr" and movie.summary_tr:
+            movie.summary = movie.summary_tr
+            
         # Increment view count
         movie.view_count += 1
         db.commit()
@@ -69,28 +84,63 @@ def get_movie(db: Session, movie_id: int):
     
     return movie
 
-def search_movies(db: Session, query: str, search_type: str = "all", limit: int = 10):
+def search_movies(db: Session, query: str, search_type: str = "all", limit: int = 10, lang: str = "en"):
     movies = []
     actors = []
     
     if search_type in ["all", "movies"]:
-        # Match any word that starts with the query
-        movies = db.query(models.Movie).filter(
-            models.Movie.title.ilike(f"%{query}%")
-        ).filter(
-            # Ensure the query appears as a consecutive substring (not scattered letters)
-            models.Movie.title.ilike(f"% {query}%") |  # " ave" - word starting with query
-            models.Movie.title.ilike(f"{query}%")      # "ave" - title starting with query
-        ).limit(limit).all()
+        if lang == "tr":
+            # Search Turkish fields: title matches first, then fill with summary matches
+            # First get title matches (up to 3)
+            title_matches = db.query(models.Movie).filter(
+                models.Movie.title_tr.ilike(f"%{query}%")
+            ).limit(3).all()
+            
+            # If we have less than 3 title matches, fill remaining with summary matches
+            if len(title_matches) < 3:
+                title_match_ids = [movie.id for movie in title_matches]
+                remaining_limit = 3 - len(title_matches)
+                
+                summary_matches = db.query(models.Movie).filter(
+                    models.Movie.summary_tr.ilike(f"%{query}%"),
+                    ~models.Movie.id.in_(title_match_ids) if title_match_ids else True
+                ).limit(remaining_limit).all()
+                
+                movies = title_matches + summary_matches
+            else:
+                movies = title_matches
+            
+            # Apply Turkish content
+            for movie in movies:
+                if movie.title_tr:
+                    movie.title = movie.title_tr
+                if movie.summary_tr:
+                    movie.summary = movie.summary_tr
+        else:
+            # Search English fields: title matches first, then fill with summary matches
+            # First get title matches (up to 3)
+            title_matches = db.query(models.Movie).filter(
+                models.Movie.title.ilike(f"%{query}%")
+            ).limit(3).all()
+            
+            # If we have less than 3 title matches, fill remaining with summary matches
+            if len(title_matches) < 3:
+                title_match_ids = [movie.id for movie in title_matches]
+                remaining_limit = 3 - len(title_matches)
+                
+                summary_matches = db.query(models.Movie).filter(
+                    models.Movie.summary.ilike(f"%{query}%"),
+                    ~models.Movie.id.in_(title_match_ids) if title_match_ids else True
+                ).limit(remaining_limit).all()
+                
+                movies = title_matches + summary_matches
+            else:
+                movies = title_matches
     
     if search_type in ["all", "actors"]:
         actors = db.query(models.Actor).filter(
             models.Actor.name.ilike(f"%{query}%")
-        ).filter(
-            # Ensure the query appears as a consecutive substring (not scattered letters)
-            models.Actor.name.ilike(f"% {query}%") |  # " ave" - word starting with query
-            models.Actor.name.ilike(f"{query}%")      # "ave" - name starting with query
-        ).limit(limit).all()
+        ).limit(3).all()  # Top 3 results only
     
     return {"movies": movies, "actors": actors}
 

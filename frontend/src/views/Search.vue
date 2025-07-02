@@ -81,6 +81,9 @@ export default {
         this.performSearch()
       },
       deep: true
+    },
+    '$i18n.locale'() {
+      this.performSearch()
     }
   },
   
@@ -101,7 +104,8 @@ export default {
           params: {
             q: query,
             search_type: searchType,
-            limit: 20
+            limit: 20,
+            lang: this.$i18n.locale
           }
         })
         

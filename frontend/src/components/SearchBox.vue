@@ -66,7 +66,8 @@ export default {
           params: {
             q: this.searchQuery,
             search_type: this.searchType,
-            limit: this.searchQuery.length === 3 ? 3 : 10
+            limit: 3,  // Always show top 3 results
+            lang: this.$i18n.locale
           }
         })
         

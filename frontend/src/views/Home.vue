@@ -63,7 +63,13 @@ export default {
   },
   
   async created() {
-    await this.fetchMovies()
+    await this.fetchMovies(this.$i18n.locale)
+  },
+  
+  watch: {
+    '$i18n.locale'(newLocale) {
+      this.fetchMovies(newLocale)
+    }
   },
   
   methods: {

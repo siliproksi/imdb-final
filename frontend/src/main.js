@@ -185,8 +185,12 @@ const messages = {
   }
 }
 
+// Get saved language from localStorage or use browser language
+const savedLanguage = localStorage.getItem('language')
+const defaultLanguage = savedLanguage || (navigator.language.startsWith('tr') ? 'tr' : 'en')
+
 const i18n = createI18n({
-  locale: navigator.language.startsWith('tr') ? 'tr' : 'en',
+  locale: defaultLanguage,
   fallbackLocale: 'en',
   messages
 })

@@ -103,6 +103,8 @@ export default {
     changeLanguage() {
       this.$i18n.locale = this.currentLanguage
       localStorage.setItem('language', this.currentLanguage)
+      // Reload page to ensure all content updates with new language
+      window.location.reload()
     },
     logout() {
       this.logoutUser()

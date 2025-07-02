@@ -40,7 +40,9 @@ class User(UserBase):
 
 class MovieBase(BaseModel):
     title: str
+    title_tr: Optional[str] = None
     summary: Optional[str] = None
+    summary_tr: Optional[str] = None
     release_year: Optional[int] = None
     duration: Optional[int] = None
     image_url: Optional[str] = None
