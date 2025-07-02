@@ -20,7 +20,7 @@
       <button @click="performSearch" class="search-btn">🔍</button>
     </div>
     
-    <div v-if="showDropdown && searchResults.length > 0" class="search-dropdown">
+    <div v-if="showDropdown && (searchResults.length > 0 || showNoResults)" class="search-dropdown">
       <div
         v-for="result in searchResults.slice(0, 3)"
         :key="result.id"
@@ -32,6 +32,10 @@
           <div class="result-title">{{ result.title || result.name }}</div>
           <div class="result-subtitle">{{ result.release_year || 'Actor' }}</div>
         </div>
+      </div>
+      
+      <div v-if="showNoResults" class="no-results-item">
+        {{ $t('search.noResults') }}
       </div>
     </div>
   </div>
@@ -48,7 +52,8 @@ export default {
       searchQuery: '',
       searchType: 'all',
       searchResults: [],
-      showDropdown: false
+      showDropdown: false,
+      showNoResults: false
     }
   },
   methods: {
@@ -57,6 +62,7 @@ export default {
         this.searchMovies()
       } else {
         this.searchResults = []
+        this.showNoResults = false
       }
     }, 300),
     
@@ -75,8 +81,12 @@ export default {
           ...response.data.movies,
           ...response.data.actors
         ]
+        
+        // Show "Not found" if no results and query is 3+ characters
+        this.showNoResults = this.searchResults.length === 0 && this.searchQuery.length >= 3
       } catch (error) {
         console.error('Search error:', error)
+        this.showNoResults = this.searchQuery.length >= 3
       }
     },
     
@@ -105,6 +115,7 @@ export default {
     hideDropdown() {
       setTimeout(() => {
         this.showDropdown = false
+        this.showNoResults = false
       }, 200)
     }
   }
@@ -269,5 +280,13 @@ export default {
 .result-subtitle {
   font-size: 0.9rem;
   color: #666;
+}
+
+.no-results-item {
+  padding: 1rem;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  border-bottom: none;
 }
 </style>
