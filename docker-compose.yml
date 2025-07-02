@@ -28,6 +28,7 @@ services:
       GOOGLE_CLIENT_ID: 19959323738-2lv4h95g32fdm07oh2q12c67hj27u0r1.apps.googleusercontent.com
       GOOGLE_CLIENT_SECRET: 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
       VIRTUAL_HOST: imdbfinalb.codeise.com
+      VIRTUAL_PORT: 8000
       LETSENCRYPT_HOST: imdbfinalb.codeise.com
       LETSENCRYPT_EMAIL: support@codeise.com
     depends_on:
