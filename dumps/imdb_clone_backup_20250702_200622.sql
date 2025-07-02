@@ -5,7 +5,7 @@
 -- Dumped from database version 15.13 (Debian 15.13-1.pgdg120+1)
 -- Dumped by pg_dump version 15.13 (Debian 15.13-1.pgdg120+1)
 
--- Started on 2025-07-02 18:00:01 UTC
+-- Started on 2025-07-02 19:06:22 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1015,7 +1015,7 @@ ALTER TABLE ONLY public.watchlist
     ADD CONSTRAINT watchlist_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
--- Completed on 2025-07-02 18:00:02 UTC
+-- Completed on 2025-07-02 19:06:22 UTC
 
 --
 -- PostgreSQL database dump complete
