@@ -21,7 +21,7 @@
               class="bar-item"
             >
               <div class="bar-info">
-                <span class="country-name">{{ item.country }}</span>
+                <span class="country-name">{{ getLocalizedCountry(item.country) }}</span>
                 <span class="rating-info">{{ item.average_rating }} ⭐ ({{ item.rating_count }})</span>
               </div>
               <div class="bar-container">
@@ -49,7 +49,7 @@
               <div class="rating-header">
                 <span class="user-info">
                   {{ rating.user.email }}
-                  <span v-if="rating.user.country" class="user-country">({{ rating.user.country }})</span>
+                  <span v-if="rating.user.country" class="user-country">({{ getLocalizedCountry(rating.user.country) }})</span>
                 </span>
                 <span class="rating-score">⭐ {{ rating.rating }}/10</span>
               </div>
@@ -72,9 +72,11 @@
 
 <script>
 import api from '../services/api'
+import countryMixin from '../mixins/countryMixin'
 
 export default {
   name: 'RatingStatsModal',
+  mixins: [countryMixin],
   props: {
     show: {
       type: Boolean,

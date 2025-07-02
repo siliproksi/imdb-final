@@ -87,7 +87,7 @@
                 <label>{{ $t('movie.filterByCountry') }}:</label>
                 <select v-model="selectedCountry" @change="onCountryChange" class="country-select">
                   <option v-for="country in ratingStats.available_countries" :key="country" :value="country">
-                    {{ country }}
+                    {{ getLocalizedCountry(country) }}
                   </option>
                 </select>
               </div>
@@ -171,9 +171,11 @@
 import { mapState } from 'vuex'
 import api from '../services/api'
 import RatingStatsModal from '../components/RatingStatsModal.vue'
+import countryMixin from '../mixins/countryMixin'
 
 export default {
   name: 'MovieDetail',
+  mixins: [countryMixin],
   components: {
     RatingStatsModal
   },
