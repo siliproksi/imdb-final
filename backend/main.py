@@ -140,6 +140,13 @@ def get_movie(movie_id: int, lang: str = "en", db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Movie not found")
     return movie
 
+@app.get("/movies/{movie_id}/rating-stats")
+def get_movie_rating_stats(movie_id: int, country: str = "All", db: Session = Depends(get_db)):
+    stats = crud.get_movie_rating_stats(db, movie_id=movie_id, country=country)
+    if stats is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    return stats
+
 @app.get("/actors/{actor_id}", response_model=schemas.ActorDetail)
 def get_actor(actor_id: int, db: Session = Depends(get_db)):
     actor = crud.get_actor(db, actor_id=actor_id)

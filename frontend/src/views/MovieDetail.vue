@@ -34,7 +34,7 @@
             </div>
             
             <div class="movie-stats">
-              <div class="stat">
+              <div class="stat clickable-stat" @click="showRatingStats">
                 <h3>{{ movie.average_rating?.toFixed(1) || 'No ratings' }}</h3>
                 <p>{{ $t('movie.averageRating') }}</p>
               </div>
@@ -79,6 +79,41 @@
             </div>
           </div>
           
+          <!-- Rating Distribution -->
+          <div v-if="ratingStats && ratingStats.total_ratings > 0" class="rating-stats-section">
+            <div class="stats-header">
+              <h3>{{ $t('movie.ratingDistribution') }}</h3>
+              <div class="country-filter">
+                <label>{{ $t('movie.filterByCountry') }}:</label>
+                <select v-model="selectedCountry" @change="onCountryChange" class="country-select">
+                  <option v-for="country in ratingStats.available_countries" :key="country" :value="country">
+                    {{ country }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="rating-histogram">
+              <div 
+                v-for="item in ratingStats.rating_distribution" 
+                :key="item.rating"
+                class="histogram-bar"
+              >
+                <div class="bar-label">
+                  <span class="star-rating">{{ item.rating }} ⭐</span>
+                  <span class="percentage">{{ item.percentage }}%</span>
+                  <span class="count">({{ item.count }})</span>
+                </div>
+                <div class="bar-container">
+                  <div 
+                    class="bar-fill"
+                    :style="{ width: item.percentage + '%' }"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="ratings-section">
             <h3>{{ $t('movie.userRatings') }}</h3>
             <div v-if="movie.ratings && movie.ratings.length > 0" class="ratings-list">
@@ -118,6 +153,13 @@
         </form>
       </div>
     </div>
+    
+    <!-- Rating Statistics Modal -->
+    <RatingStatsModal 
+      :show="showStatsModal" 
+      :movie-id="movie.id" 
+      @close="showStatsModal = false"
+    />
   </div>
   
   <div v-else class="loading">
@@ -128,13 +170,20 @@
 <script>
 import { mapState } from 'vuex'
 import api from '../services/api'
+import RatingStatsModal from '../components/RatingStatsModal.vue'
 
 export default {
   name: 'MovieDetail',
+  components: {
+    RatingStatsModal
+  },
   data() {
     return {
       movie: null,
+      ratingStats: null,
+      selectedCountry: 'All',
       showRatingModal: false,
+      showStatsModal: false,
       ratingForm: {
         rating: 5,
         comment: ''
@@ -148,11 +197,18 @@ export default {
   
   async created() {
     await this.fetchMovie()
+    await this.fetchRatingStats()
+    
+    // Check if we should open rating modal immediately
+    if (this.$route.query.openRating === 'true') {
+      this.showRatingModal = true
+    }
   },
   
   watch: {
     '$i18n.locale'() {
       this.fetchMovie()
+      this.fetchRatingStats()
     }
   },
   
@@ -166,6 +222,18 @@ export default {
       } catch (error) {
         console.error('Error fetching movie:', error)
         this.$router.push('/')
+      }
+    },
+    
+    async fetchRatingStats(country = 'All') {
+      try {
+        const response = await api.get(`/movies/${this.$route.params.id}/rating-stats`, {
+          params: { country: country }
+        })
+        this.ratingStats = response.data
+        this.selectedCountry = response.data.selected_country
+      } catch (error) {
+        console.error('Error fetching rating stats:', error)
       }
     },
     
@@ -237,6 +305,19 @@ export default {
         
         alert(errorMessage)
       }
+    },
+    
+    showRatingStats() {
+      this.showStatsModal = true
+    },
+    
+    getBarWidth(rating) {
+      // Convert rating (0-10) to percentage (0-100)
+      return (rating / 10) * 100
+    },
+    
+    async onCountryChange() {
+      await this.fetchRatingStats(this.selectedCountry)
     }
   }
 }
@@ -351,6 +432,18 @@ export default {
   color: #ccc;
 }
 
+.clickable-stat {
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.clickable-stat:hover {
+  transform: translateY(-2px);
+  background-color: rgba(245, 197, 24, 0.1);
+}
+
 .movie-details-section {
   padding: 3rem 0;
 }
@@ -446,6 +539,86 @@ export default {
   text-align: center;
   color: #ccc;
   padding: 2rem;
+}
+
+.rating-stats-section {
+  margin-bottom: 3rem;
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.country-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.country-filter label {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.country-select {
+  background-color: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.rating-histogram {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.histogram-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.star-rating {
+  color: #f5c518;
+  font-weight: bold;
+  min-width: 50px;
+}
+
+.percentage {
+  color: #fff;
+  font-weight: bold;
+}
+
+.count {
+  color: #ccc;
+  font-size: 0.8rem;
+}
+
+.bar-container {
+  height: 20px;
+  background-color: #333;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f5c518, #e6b800);
+  border-radius: 10px;
+  transition: width 0.3s ease;
 }
 
 .loading {
@@ -640,6 +813,22 @@ export default {
     flex-direction: column;
     gap: 0.5rem;
     text-align: center;
+  }
+  
+  .stats-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .country-filter {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .country-select {
+    flex: 1;
+    margin-left: 0.5rem;
   }
   
   .modal-content {

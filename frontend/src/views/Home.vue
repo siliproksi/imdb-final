@@ -47,7 +47,7 @@
                   <button v-if="!user" @click.stop="redirectToLogin" class="action-btn rate-btn">
                     {{ $t('movie.rateMovie') }}
                   </button>
-                  <button v-else @click.stop="goToMovie(movie.id)" class="action-btn rate-btn">
+                  <button v-else @click.stop="goToMovieWithRating(movie.id)" class="action-btn rate-btn">
                     {{ $t('movie.rateMovie') }}
                   </button>
                 </div>
@@ -85,6 +85,13 @@ export default {
     
     goToMovie(movieId) {
       this.$router.push(`/movie/${movieId}`)
+    },
+    
+    goToMovieWithRating(movieId) {
+      this.$router.push({
+        path: `/movie/${movieId}`,
+        query: { openRating: 'true' }
+      })
     },
     
     redirectToLogin() {

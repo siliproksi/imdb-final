@@ -71,7 +71,14 @@ const messages = {
       rating: 'Rating (1-10)',
       comment: 'Comment (Optional)',
       cancel: 'Cancel',
-      submitRating: 'Submit Rating'
+      submitRating: 'Submit Rating',
+      ratingDistribution: 'Rating Distribution',
+      ratingByCountry: 'Average Rating by Country',
+      allRatingsAndComments: 'All Ratings & Comments',
+      filterByCountry: 'Filter by Country',
+      noCountryData: 'No country data available',
+      loadingStats: 'Loading rating statistics...',
+      errorLoadingStats: 'Error loading rating statistics'
     },
     watchlist: {
       title: 'My Watchlist',
@@ -160,7 +167,14 @@ const messages = {
       rating: 'Puan (1-10)',
       comment: 'Yorum (İsteğe Bağlı)',
       cancel: 'İptal',
-      submitRating: 'Puanı Gönder'
+      submitRating: 'Puanı Gönder',
+      ratingDistribution: 'Puan Dağılımı',
+      ratingByCountry: 'Ülkelere Göre Ortalama Puan',
+      allRatingsAndComments: 'Tüm Puanlar ve Yorumlar',
+      filterByCountry: 'Ülkeye Göre Filtrele',
+      noCountryData: 'Ülke verisi mevcut değil',
+      loadingStats: 'Puan istatistikleri yükleniyor...',
+      errorLoadingStats: 'Puan istatistikleri yüklenirken hata oluştu'
     },
     watchlist: {
       title: 'İzleme Listem',

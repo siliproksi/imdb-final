@@ -211,6 +211,64 @@ def remove_from_watchlist(db: Session, watchlist_id: int, user_id: int):
     db.commit()
     return {"message": "Removed from watchlist"}
 
+def get_movie_rating_stats(db: Session, movie_id: int, country: str = None):
+    """Get rating statistics for a movie including rating distribution histogram"""
+    movie = db.query(models.Movie).filter(models.Movie.id == movie_id).first()
+    if not movie:
+        return None
+    
+    # Base query for ratings with user info
+    ratings_query = db.query(models.Rating).options(
+        joinedload(models.Rating.user)
+    ).filter(models.Rating.movie_id == movie_id)
+    
+    # Filter by country if specified
+    if country and country != "All":
+        ratings_query = ratings_query.join(models.User).filter(models.User.country == country)
+    
+    ratings = ratings_query.order_by(desc(models.Rating.created_at)).all()
+    
+    # Calculate rating distribution (1-10 stars)
+    rating_distribution = {}
+    total_ratings = len(ratings)
+    
+    # Initialize all ratings 1-10 with 0 count
+    for i in range(1, 11):
+        rating_distribution[i] = 0
+    
+    # Count ratings
+    for rating in ratings:
+        rating_value = int(round(rating.rating))  # Round to nearest integer
+        if rating_value in rating_distribution:
+            rating_distribution[rating_value] += 1
+    
+    # Convert to percentage and format for frontend
+    distribution_data = []
+    for rating_val in range(1, 11):
+        count = rating_distribution[rating_val]
+        percentage = (count / total_ratings * 100) if total_ratings > 0 else 0
+        distribution_data.append({
+            "rating": rating_val,
+            "count": count,
+            "percentage": round(percentage, 1)
+        })
+    
+    # Get available countries
+    countries = db.query(models.User.country).join(models.Rating).filter(
+        models.Rating.movie_id == movie_id,
+        models.User.country.isnot(None)
+    ).distinct().order_by(models.User.country).all()
+    
+    country_list = ["All"] + [country[0] for country in countries]
+    
+    return {
+        "total_ratings": total_ratings,
+        "rating_distribution": distribution_data,
+        "available_countries": country_list,
+        "selected_country": country or "All",
+        "ratings": ratings
+    }
+
 def calculate_popularity(movie, avg_rating, total_ratings):
     # Business logic for popularity calculation
     # Factors: average rating, number of ratings, view count, recency
