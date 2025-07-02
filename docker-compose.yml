@@ -1,4 +1,8 @@
 
+networks:
+  imdb:
+    external: true
+
 services:
   db:
     image: postgres:15
@@ -13,43 +17,76 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./dumps:/dumps
     networks:
-      - imdb_network
+      - imdb
 
   backend:
     build: ./backend
     container_name: imdb_backend
-    ports:
-      - "8000:8000"
     environment:
       DATABASE_URL: postgresql://imdb_user:imdb_password@db:5432/imdb_clone
       SECRET_KEY: your-secret-key-here
       GOOGLE_CLIENT_ID: 19959323738-2lv4h95g32fdm07oh2q12c67hj27u0r1.apps.googleusercontent.com
       GOOGLE_CLIENT_SECRET: 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
+      VIRTUAL_HOST: imdbfinalb.codeise.com
+      LETSENCRYPT_HOST: imdbfinalb.codeise.com
+      LETSENCRYPT_EMAIL: support@codeise.com
     depends_on:
       - db
     volumes:
       - ./backend:/app
       - /app/__pycache__
     networks:
-      - imdb_network
+      - imdb
 
   frontend:
     build: ./frontend
     container_name: imdb_frontend
-    ports:
-      - "3000:3000"
     environment:
-      VUE_APP_API_URL: http://localhost:8000
+      VUE_APP_API_URL: https://imdbfinalb.codeise.com
       VUE_APP_GOOGLE_CLIENT_ID: 19959323738-2lv4h95g32fdm07oh2q12c67hj27u0r1.apps.googleusercontent.com
+      VIRTUAL_HOST: imdbfinal.codeise.com
+      LETSENCRYPT_HOST: imdbfinal.codeise.com
+      LETSENCRYPT_EMAIL: support@codeise.com
     volumes:
       - ./frontend:/app
       - /app/node_modules
     networks:
-      - imdb_network
+      - imdb
+
+  nginx-proxy:
+    container_name: nginx-proxy
+    image: jwilder/nginx-proxy
+    expose:
+      - "9000"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhostd:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    networks:
+      - imdb
+
+  letsencrypt-nginx-proxy-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhostd:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      NGINX_PROXY_CONTAINER: nginx-proxy
+      DEFAULT_EMAIL: support@codeise.com
+    networks:
+      - imdb
 
 volumes:
   postgres_data:
-
-networks:
-  imdb_network:
-    driver: bridge
+  certs:
+  html:
+  vhostd:
+  acme:
