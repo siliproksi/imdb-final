@@ -67,16 +67,22 @@ def search_movies(db: Session, query: str, search_type: str = "all", limit: int 
     actors = []
     
     if search_type in ["all", "movies"]:
+        # Match any word that starts with the query
         movies = db.query(models.Movie).filter(
-            or_(
-                models.Movie.title.ilike(f"%{query}%"),
-                models.Movie.summary.ilike(f"%{query}%")
-            )
+            models.Movie.title.ilike(f"%{query}%")
+        ).filter(
+            # Ensure the query appears as a consecutive substring (not scattered letters)
+            models.Movie.title.ilike(f"% {query}%") |  # " ave" - word starting with query
+            models.Movie.title.ilike(f"{query}%")      # "ave" - title starting with query
         ).limit(limit).all()
     
     if search_type in ["all", "actors"]:
         actors = db.query(models.Actor).filter(
             models.Actor.name.ilike(f"%{query}%")
+        ).filter(
+            # Ensure the query appears as a consecutive substring (not scattered letters)
+            models.Actor.name.ilike(f"% {query}%") |  # " ave" - word starting with query
+            models.Actor.name.ilike(f"{query}%")      # "ave" - name starting with query
         ).limit(limit).all()
     
     return {"movies": movies, "actors": actors}
